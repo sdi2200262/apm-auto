@@ -24,7 +24,6 @@ import path from 'path';
  * - {AGENTS_DIR}: Platform-specific agents directory
  * - {PLANNER_SUBAGENT_GUIDANCE}: Platform-specific subagent exploration guidance for Planner
  * - {MANAGER_SUBAGENT_GUIDANCE}: Platform-specific subagent guidance for Manager investigation
- * - {WORKER_SUBAGENT_GUIDANCE}: Platform-specific subagent guidance for Worker context integration
  * - {SUBAGENT_GUIDANCE}: Platform-specific subagent guidance for non-role agents (standalone commands)
  * - {ARCHIVE_EXPLORER_GUIDANCE}: Platform-specific guidance for spawning the apm-archive-explorer custom agent
  * - {CONTEXT_ATTACH_SYNTAX}: Platform-specific instructions for how Users reference files in chat
@@ -111,10 +110,6 @@ export function replacePlaceholders(content, context) {
   // Replace MANAGER_SUBAGENT_GUIDANCE placeholder
   const managerGuidanceText = `Spawn a dedicated ${subagentGuidance.explorerName} subagent for investigation - it runs in its own context window, preserving yours for coordination: \`${subagentGuidance.toolSyntax}\`. Structure the prompt with the investigation goal, files to examine, and what to report back.`;
   replaced = replaced.replace(/{MANAGER_SUBAGENT_GUIDANCE}/g, managerGuidanceText);
-
-  // Replace WORKER_SUBAGENT_GUIDANCE placeholder
-  const workerGuidanceText = `For complex cross-agent dependencies or multi-file exploration, spawn a dedicated ${subagentGuidance.explorerName} subagent rather than inline searching - it runs in its own context window and returns consolidated findings: \`${subagentGuidance.toolSyntax}\`. Structure the prompt with specific files to read and questions to answer.`;
-  replaced = replaced.replace(/{WORKER_SUBAGENT_GUIDANCE}/g, workerGuidanceText);
 
   // Replace SUBAGENT_GUIDANCE placeholder (generic, for non-role agents)
   const subagentGuidanceText = `Spawn a dedicated ${subagentGuidance.explorerName} subagent - it runs in its own context window and returns findings when complete: \`${subagentGuidance.toolSyntax}\`.`;

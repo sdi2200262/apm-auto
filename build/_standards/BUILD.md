@@ -124,20 +124,22 @@ Each bundle contains (with dot prefixes):
   {configDir}/
     commands/
       apm-1-initiate-planner.md
-      ...
+      apm-2-initiate-manager.md
+      apm-3-handoff-manager.md
+      apm-4-summarize-session.md
+      apm-5-recover.md
     guides/
       context-gathering.md
-      ...
+      work-breakdown.md
+      task-assignment.md
+      task-execution.md
+      task-logging.md
+      task-review.md
     skills/
       apm-communication/
         SKILL.md
-        bus-integration.md
-      apm-version-control/
-        SKILL.md
-      ...
     agents/
       apm-archive-explorer.md
-      ...
 ```
 
 Skills output as `<skill-name>/SKILL.md` directories (may contain additional files). Guides are flat files. Agents are flat files.
@@ -150,11 +152,12 @@ Commands are named directly in source files:
 templates/commands/
   apm-1-initiate-planner.md
   apm-2-initiate-manager.md
-  apm-3-initiate-worker.md
-  ...
+  apm-3-handoff-manager.md
+  apm-4-summarize-session.md
+  apm-5-recover.md
 ```
 
-Output filename matches source (extension changes for TOML targets).
+Output filename matches source.
 
 ### Frontmatter
 
@@ -178,9 +181,9 @@ Supported placeholders:
 - `{TIMESTAMP}` - ISO timestamp
 - `{SKILL_PATH:name}`, `{GUIDE_PATH:name}`, `{COMMAND_PATH:name}`, `{AGENT_PATH:name}` - Cross-reference paths
 - `{SKILLS_DIR}`, `{GUIDES_DIR}`, `{AGENTS_DIR}` - Platform-specific directory paths
-- `{ARGS}` - `$ARGUMENTS` (Markdown), `{{args}}` (TOML), `${input:args}` (Copilot)
-- `{RULES_FILE}` - `CLAUDE.md` (Claude), `GEMINI.md` (Gemini), `AGENTS.md` (others)
-- `{PLANNER_SUBAGENT_GUIDANCE}`, `{MANAGER_SUBAGENT_GUIDANCE}`, `{WORKER_SUBAGENT_GUIDANCE}`, `{SUBAGENT_GUIDANCE}` - Role-specific subagent syntax
+- `{ARGS}` - `$ARGUMENTS`
+- `{RULES_FILE}` - `CLAUDE.md`
+- `{PLANNER_SUBAGENT_GUIDANCE}`, `{MANAGER_SUBAGENT_GUIDANCE}`, `{SUBAGENT_GUIDANCE}` - Role-specific subagent syntax
 - `{ARCHIVE_EXPLORER_GUIDANCE}` - Subagent spawn syntax for archive explorer agent
 - `{CONTEXT_ATTACH_SYNTAX}` - Platform-specific file reference instructions
 
@@ -214,7 +217,7 @@ await createZipArchive(targetBuildDir, zipPath);
 }
 ```
 
-`postInstallNote` is optional (only Gemini currently uses it).
+`postInstallNote` is optional.
 
 ## Logging
 
@@ -262,4 +265,3 @@ Required fields per target:
 ### Format Types
 
 - `markdown` - Standard markdown output
-- `toml` - TOML format with `description` and `prompt` fields
