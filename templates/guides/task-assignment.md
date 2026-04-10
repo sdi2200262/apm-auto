@@ -43,11 +43,11 @@ Task Prompts must be self-contained. Subagents have the same tools as any agent 
 
 Follow-up Task Prompts occur when the review outcome determines retry after investigation. You arrive with: original Task Log findings, investigation results, understanding of what went wrong, and potentially modified planning documents.
 
-**Content principle:** The follow-up is a new prompt - Objective, Instructions, Output, and Validation are refined based on what went wrong. Do not copy the previous prompt. Give the subagent concrete direction rather than restating the original Task Prompt.
+**Content principle:** The follow-up is a completely new prompt dispatched to a fresh subagent with zero prior context. It is not a continuation - the new subagent has no knowledge of the previous attempt. The follow-up must be self-contained: refined Objective, Instructions, Output, and Validation based on what went wrong, plus an explicit follow-up context section explaining what was previously attempted, what issues were encountered, and what approach to take instead. Include the previous Task Log's diagnostics as factual context. Do not copy the previous prompt - give the subagent concrete, corrected direction.
 
-**Log path continuity:** Use the same `log_path` as the original. The subagent overwrites the previous log. The Manager captures iteration patterns in Stage summaries when relevant.
+**Log path continuity:** Use the same `log_path` as the original. The subagent overwrites the previous log, keeping memory coherent with one log per Task regardless of how many dispatches occurred. The Manager captures iteration patterns in Stage summaries when relevant.
 
-**Dispatch mechanism:** The default approach is a fresh `Agent()` call with the refined prompt. If the experimental `SendMessage` capability is available and the subagent made good progress (Partial with clear remaining work), the Manager may continue the existing subagent for efficiency. Continue when the subagent made substantial progress and just needs a nudge. Spawn fresh when the approach was wrong or scope needs correction.
+**Dispatch mechanism:** Always a fresh `Agent()` call. Subagents are ephemeral - there is no mechanism to continue a completed subagent.
 
 ### 2.4 Dispatch Standards
 
@@ -80,36 +80,15 @@ Worktrees contain only tracked files; if a subagent needs untracked assets, note
 
 **Why not `isolation="worktree"`:** Claude Code's auto-worktree creates branches named `worktree-<slug>` at `.claude/worktrees/`, which does not follow APM's branch naming conventions. Manual worktree management gives the Manager full control over branch names and paths.
 
-### 2.6 Subagent Preamble
+### 2.6 Dispatch Mechanics
 
-Every Task Prompt is prepended with a standard preamble that instructs the subagent to read the execution and logging guides, notes that CLAUDE.md is auto-loaded, and states the no-nested-subagent constraint:
+Task dispatch uses the `apm-worker` custom subagent defined in `{AGENT_PATH:apm-worker}`. The agent definition contains the subagent's behavioral rules (execution procedure, iteration limits, logging formats, version control standards) as its system prompt. The Task Prompt content is passed as the `prompt` parameter - it contains only the task-specific content (frontmatter, dependency context, objective, instructions, validation criteria).
 
-```
-You are executing a Task for an APM project. Before starting, read these documents in full:
-- {GUIDE_PATH:task-execution}
-- {GUIDE_PATH:task-logging}
+Dispatch format: `Agent(subagent_type="apm-worker", description="<short task label>", prompt=<task_prompt_content>)`. The `description` parameter is required on every call (e.g., `description="Execute Task 1.2: Implement user auth"`).
 
-Note: CLAUDE.md (project Rules) is already loaded in your context automatically.
+**Foreground by default.** All dispatch runs in the foreground - the Manager blocks until the subagent returns. Background dispatch is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
 
-Execute the Task below. Follow the execution guide: integrate dependency context,
-execute instructions, validate, iterate if needed, write the Task Log at the specified
-log_path, then return a structured result summary.
-
-CRITICAL CONSTRAINTS:
-- You CANNOT spawn subagents. Do not attempt to use the Agent tool.
-- You have a LIMITED iteration budget for debugging. If a correction does not resolve
-  an issue after 2-3 targeted attempts, STOP iterating. Write the Task Log with Partial
-  status, commit any progress, and return immediately with detailed diagnostics (error
-  output, what you investigated, what you tried, your root cause hypothesis). The Manager
-  has tools you do not - it can spawn investigation subagents, reframe the approach, or
-  restructure the Task. Continuing to iterate past this point wastes context and degrades
-  your output quality. Return early with good diagnostics rather than late with exhausted
-  context.
-
----
-```
-
-The `description` parameter is required on every `Agent()` call (e.g., `description="Execute Task 1.2: Implement user auth"`).
+For parallel dispatch, multiple `Agent()` calls in a single message run concurrently. The Manager blocks until all return.
 
 ---
 
@@ -148,11 +127,10 @@ Perform the following actions:
 2. Construct prompt body: Task Reference, Context from Dependencies (if applicable), Objective, Detailed Instructions, Workspace, Expected Output, Validation Criteria, Instruction Accuracy, Task Iteration, Task Logging instructions, Reporting Instructions.
 3. Create a feature branch off the repository's base branch per §2.5 Version Control Standards. For parallel dispatch, create a worktree: `git worktree add .apm/worktrees/<branch-slug> -b <branch-name>`. Include the branch name (sequential) or worktree path (parallel) in the Workspace section.
 4. Record the branch name in the Task row's Branch column when updating the Tracker.
-5. Prepend the subagent preamble per §2.6 Subagent Preamble to the Task Prompt content.
-6. Dispatch:
-   - *Sequential (single or batch):* `Agent(description="...", prompt=preamble + task_prompt)`.
-   - *Parallel:* Multiple `Agent(description="...", prompt=preamble + task_prompt)` calls in a single message. Claude Code runs them concurrently.
-   For batches, use §4.5 Batch Envelope Format to combine multiple Task Prompts in the prompt string.
+5. Dispatch per §2.6 Dispatch Mechanics:
+   - *Sequential (single or batch):* `Agent(subagent_type="apm-worker", description="...", prompt=task_prompt_content)`.
+   - *Parallel:* Multiple `Agent(subagent_type="apm-worker", description="...", prompt=task_prompt_content)` calls in a single message.
+   For batches, use §4.5 Batch Envelope Format to combine multiple Task Prompts in the prompt content.
 
 ### 3.4 Follow-Up Task Prompt Construction
 
@@ -163,8 +141,7 @@ Perform the following actions:
 2. If planning documents were modified, extract relevant updated content per §3.2 Per-Task Analysis.
 3. Refine all content sections per §2.3 Follow-Up Standards. Include a follow-up context section explaining the issue and required refinement.
 4. Construct the follow-up prompt per §4.2 Follow-Up Format. Same `log_path` as the original.
-5. Prepend the subagent preamble per §2.6 Subagent Preamble.
-6. Dispatch via `Agent(description="...", prompt=preamble + follow_up_prompt)`, or via `SendMessage` if continuing an existing subagent per §2.3 Follow-Up Standards.
+5. Dispatch per §2.6 Dispatch Mechanics: `Agent(subagent_type="apm-worker", description="...", prompt=follow_up_prompt_content)`.
 
 ---
 
@@ -204,9 +181,7 @@ has_dependencies: true
 - *Expected Output:* Deliverables from Plan Output field.
 - *Validation Criteria:* From Plan Validation field.
 - *Instruction Accuracy:* The objective and expected output are authoritative - deliver those. However, the detailed instructions and steps were constructed from planning documents and may contain inaccurate details, missed prerequisites, or outdated assumptions about the codebase. When a specific instruction contradicts what the codebase actually shows, validate the actual state rather than persisting with the instruction as written.
-- *Task Iteration:* When validation fails, investigate before fixing - read error output, trace the cause, understand what went wrong. Apply one targeted change per iteration. You cannot spawn subagents for debugging - iterate within your own context only. Hard limit: if the issue is not resolved after 2-3 targeted correction attempts, stop iterating immediately. Commit progress, write the Task Log with Partial status, and return with detailed diagnostics: the error output, what you investigated, what you tried, and your root cause hypothesis. The Manager will handle escalation. Persisting past this limit degrades output quality and wastes context budget.
-- *Task Logging:* Path and reference to `{GUIDE_PATH:task-logging}` §3.1 Task Log Procedure.
-- *Task Report:* Instruction to return a structured result summary as final output.
+- *Task Logging:* The `log_path` where the subagent writes the Task Log. The `apm-worker` agent definition contains the logging format and procedure - no additional logging instructions needed in the prompt.
 
 ### 4.2 Follow-Up Format
 

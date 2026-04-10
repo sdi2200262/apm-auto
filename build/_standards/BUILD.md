@@ -132,14 +132,13 @@ Each bundle contains (with dot prefixes):
       context-gathering.md
       work-breakdown.md
       task-assignment.md
-      task-execution.md
-      task-logging.md
       task-review.md
     skills/
       apm-communication/
         SKILL.md
     agents/
       apm-archive-explorer.md
+      apm-worker.md
 ```
 
 Skills output as `<skill-name>/SKILL.md` directories (may contain additional files). Guides are flat files. Agents are flat files.
