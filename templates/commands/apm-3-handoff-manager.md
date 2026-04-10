@@ -25,7 +25,6 @@ Perform the following actions:
 1. Determine instance numbers: your current instance number and incoming Manager instance number (yours + 1).
 2. Create Handoff Log per §3 Handoff Log Structure, capturing **past actions** - what was done, decided, and observed. Content is strictly past tense; current state belongs in the handoff prompt.
    - Coordination overview: Stages managed, Tasks reviewed, dispatch cycles completed.
-   - Tracked Worker Handoffs (which Workers, from which Stage) - most critical for dependency context treatment.
    - If auto-compaction occurred during this instance, note it and describe which portions of working context are reconstructed rather than first-hand from the summary.
    - VC state extracted from the Tracker in context: active branches, worktrees, pending merges.
    - User preferences and communication patterns.
@@ -37,7 +36,7 @@ Perform the following actions:
 1. Create handoff prompt per §4 Handoff Prompt Structure, capturing **current state** - what is happening now. Content is actionable and present-tense; past actions belong in the Handoff Log.
    - Outstanding Tasks in full: objectives, expected outputs, detailed instructions, review criteria, relevant Spec sections, dependency context, workspace information.
    - Mid-review progress and pending review outcomes.
-   - Active Workers and their dispatch state.
+   - Active dispatch state (pending subagent results, Tasks in progress).
    - Pointers to Task Logs and files for the incoming Manager to read.
 
 ### 2.3 User Review and Finalization
@@ -76,7 +75,7 @@ stage: <N>
 **Body:**
 - *Title:* `# Manager Handoff <N> (Manager <N> → Manager <N+1>)`. Each section uses `##` heading.
 - *Summary:* Stages coordinated, Tasks reviewed, dispatch cycles completed.
-- *Working Context.* Tracked Worker Handoffs table (Agent, Handoff Stage, current-Stage logs loaded, notes) with dependency context implication. VC state: active branches, worktrees, pending merges, base branch. Dispatch patterns.
+- *Working Context.* VC state: active branches, worktrees, pending merges, base branch. Dispatch patterns and observations.
 - *Working Notes:* Coordination insights, User preferences, decisions made, approaches tried.
 
 ---
@@ -88,12 +87,12 @@ Written to `.apm/bus/manager/handoff.md`. The incoming Manager processes this pr
 **Required content:**
 - *Identity:* Outgoing and incoming instance numbers.
 - *Rebuilding context:*
-  1. Read Handoff Log - note tracked Worker Handoffs and VC state.
-  2. Read current-Stage Task Logs (all agents).
+  1. Read Handoff Log - note VC state and coordination context.
+  2. Read current-Stage Task Logs.
   3. For previous-Stage dependency context encountered later: read the specific Task Log on demand. If the Task Log is insufficient, read referenced files to reconstruct context.
 - *Current State:* Current Stage, Stage progress, next Task, blockers, working notes.
 - *Immediate Next Action:* Specific coordination action to resume.
-- *Closing instruction:* Output a concise understanding summary (project state, Worker Handoffs and implications, VC state, next action) then proceed with coordination.
+- *Closing instruction:* Output a concise understanding summary (project state, VC state, next action) then proceed with coordination.
 
 ---
 

@@ -10,8 +10,8 @@ This command summarizes the current APM session and optionally archives it. You 
 **Procedure:**
 1. Read the following artifacts directly (these reads are independent):
    - `.apm/spec.md` - design decisions and constraints
-   - `.apm/plan.md` - Stages, Tasks, agent assignments
-   - `.apm/tracker.md` - Task statuses, Worker states, working notes
+   - `.apm/plan.md` - Stages, Tasks, Worker Group assignments
+   - `.apm/tracker.md` - Task statuses, working notes
    - `.apm/memory/index.md` - Memory notes and Stage summaries
    If working notes or Stage summaries reference specific Task Logs for claims or findings that need verification, read those logs directly. Do not read all Task Logs - comprehensive log review is handled by the subagent in step 2.
 2. {SUBAGENT_GUIDANCE} Prompt it to read all `.apm/` artifacts including Task Logs in `.apm/memory/` and cross-validate against the current codebase. The subagent verifies that deliverables exist, commits are on the expected branches, and key validation results hold. It reports back: per-Stage outcomes with log-level detail, codebase staleness relative to `.apm/` state, and notable findings from execution.

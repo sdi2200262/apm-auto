@@ -8,13 +8,8 @@ title: <Project Name>
 
 **Stage 1:**
 
-| Task | Status | Agent | Branch |
-|------|--------|-------|--------|
-
-## Worker Tracking
-
-| Agent | Instance | Notes |
-|-------|----------|-------|
+| Task | Status | Domain | Branch |
+|------|--------|--------|--------|
 
 ## Version Control
 
