@@ -12,10 +12,10 @@ Different document types have different structural needs. This matrix defines th
 
 | Document Type | Structure Policy |
 | ------------- | ---------------- |
-| **Initiation commands** (`apm-1`, `apm-2`, `apm-3`) | Strict structure. Role declaration, initiation, core procedures, operating rules. |
-| **Utility commands** (`apm-4`, `apm-5`, `apm-8`) | Lightweight structure. Short trigger or standalone commands - full rigidity adds no clarity. |
-| **Handoff commands** (`apm-6`, `apm-7`) | Lightweight structure. Procedure, structural specs for artifacts. |
-| **Troubleshooting commands** (`apm-9`) | Lightweight structure. Recovery and diagnostic commands for workflow disruptions. |
+| **Initiation commands** (`apm-1`, `apm-2`) | Strict structure. Role declaration, initiation, core procedures, operating rules. |
+| **Handoff commands** (`apm-3`) | Lightweight structure. Procedure, structural specs for artifacts. |
+| **Utility commands** (`apm-4`) | Lightweight structure. Short trigger or standalone commands - full rigidity adds no clarity. |
+| **Troubleshooting commands** (`apm-5`) | Lightweight structure. Recovery and diagnostic commands for workflow disruptions. |
 | **Guides** | Strict 5-section pattern (§1 Overview through §5 Content Guidelines) by default. Sections may be merged only when there is a clear, justified reduction in cross-referencing overhead - not for cosmetic reasons. |
 | **Skills** | Free-form structure. Required: §1 Overview (reading agents, objectives, outputs) and end marker. Internal organization adapts to the skill's nature - skills may contain standards, procedures, reference content, or any combination. |
 | **Agents** | Free-form structure. Required: §1 Overview (spawning agents, purpose, outputs) and end marker. Internal organization adapts to the agent's purpose. |
@@ -59,7 +59,7 @@ Commands follow a variable structure based on purpose, with required opening and
 | Section | Content |
 | ------- | ------- |
 | §1 Overview | Role declaration ("You are the **[Agent Type]**"), role scope, greeting instruction, responsibilities, skill reference. |
-| §2 Initiation | First instance vs incoming agent logic, artifact reading. Worker includes identity binding. Exemption: the Planner (`apm-1`) operates as a single instance with no Handoff or incoming agent logic, so §2 is omitted and core Procedures start at §2. |
+| §2 Initiation | First instance vs incoming agent logic, artifact reading. Exemption: the Planner (`apm-1`) operates as a single instance with no Handoff or incoming agent logic, so §2 is omitted and core Procedures start at §2. |
 | §3+ [Core Procedures] | Main procedures for this agent type. |
 | §N Operating Rules | Boundaries, communication, subagent usage. |
 
