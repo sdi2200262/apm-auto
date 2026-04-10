@@ -9,7 +9,7 @@ This guide defines the process for Work Breakdown, which transforms gathered con
 ### 1.1 Outputs
 
 - *Spec:* Design decisions and constraints that define what is being built. Free-form structure determined by project needs.
-- *Plan:* Stage and Task breakdown with Worker assignments, validation criteria, dependency chains, and Dependency Graph.
+- *Plan:* Stage and Task breakdown with Worker Group assignments, validation criteria, dependency chains, and Dependency Graph.
 - *`{RULES_FILE}`:* Universal execution-level Rules applied during Task execution.
 
 All context gathered during Context Gathering must be captured across these three artifacts. If you omit gathered context from all three, justify why it is not needed for execution - the Manager and subagents operate from these documents alone. How context maps to each document is governed by §2.1 Workflow Context. Decomposition granularity adapts to project size and complexity - smaller projects warrant lighter breakdown, larger projects may need more detail.
@@ -58,15 +58,15 @@ The Spec defines what is being built - design decisions, constraints, and requir
 
 **Source documents:** When User documents already authoritatively define requirements, reference them rather than restating - the Spec captures design decisions layered on existing requirements.
 
-**Workspace structure:** When the workspace contains multiple repositories or codebases, capture workspace structure in the Spec - which repositories are working targets, which are read-only references, and where Workers operate.
+**Workspace structure:** When the workspace contains multiple repositories or codebases, capture workspace structure in the Spec - which repositories are working targets, which are read-only references, and where subagents operate.
 
 **Extraction structure:** Structure for extraction per §2.1 Workflow Context - decisions should be locatable and separable so the Manager can extract relevant content per-Task into Task Prompts.
 
 ### 2.4 Plan Standards
 
-The Plan defines how work is organized - Stages, Tasks, Worker assignments, dependencies, and validation criteria. The Manager uses it for coordination and progress tracking.
+The Plan defines how work is organized - Stages, Tasks, Worker Group assignments, dependencies, and validation criteria. The Manager uses it for coordination and progress tracking.
 
-**Content placement:** Task-level content - objectives, deliverables, Worker assignments, validation criteria, dependencies, step-by-step guidance. Design decisions across Tasks belong in the Spec; universal execution patterns belong in Rules.
+**Content placement:** Task-level content - objectives, deliverables, Worker Group assignments, validation criteria, dependencies, step-by-step guidance. Design decisions across Tasks belong in the Spec; universal execution patterns belong in Rules.
 
 **Task self-sufficiency:** Each Task must contain enough context for a subagent to execute from a Task Prompt alone per §2.1 Workflow Context.
 
@@ -96,7 +96,7 @@ Present analysis visibly in chat for the User to review per `{SKILL_PATH:apm-com
 
 ### 3.1 Spec Analysis
 
-Present reasoning under the header **Spec Analysis:** addressing the aspects below. The Spec captures what is being built - not how work is decomposed. Workers, Stages, and Task structure are determined during Plan Analysis. Perform the following actions per §2.3 Spec Standards.
+Present reasoning under the header **Spec Analysis:** addressing the aspects below. The Spec captures what is being built - not how work is decomposed. Worker Groups, Stages, and Task structure are determined during Plan Analysis. Perform the following actions per §2.3 Spec Standards.
 1. Analyze design decisions from gathered context:
    - *Design decisions.* Each explicit choice and implicit constraint embedded in requirements: what was decided, what alternatives existed, why this direction. Surface assumptions stated as facts that represent actual decisions.
    - *Source documents:* which requirements already have authoritative definitions in User documents; reference rather than duplicate.
@@ -135,7 +135,7 @@ Present reasoning under the header **Plan Analysis:** with sub-headers **Domain 
    - *Pre-write checks.* Verify the analysis is complete: every Task was analyzed with all aspects covered (Worker Group assignment, scope, guidance, validation, dependencies, steps), workload is reasonably distributed across Worker Groups, all dependencies are identified, and notes for the Manager are ready per §2.1 Workflow Context. Correct issues before proceeding.
 2. Read `.apm/plan.md`, then write the full Plan per §4.2 Plan Format. Set `title` to the project name (same as Spec) and `modified` to "Plan creation by the Planner." Enrich Task details from reasoning. Include the Dependency Graph in the Plan header.
 3. Pause for User review:
-   - State the Plan is complete and the artifact is created. Present a summary to the User: Worker count, Stage count with names and Task counts, total Tasks, dispatch patterns.
+   - State the Plan is complete and the artifact is created. Present a summary to the User: Worker Group count, Stage count with names and Task counts, total Tasks, dispatch patterns.
    - Ask User to review the Plan.
    - If modifications needed, apply and repeat step 3.
    - If approved, continue to §3.3 Rules Analysis.
@@ -146,10 +146,10 @@ Present reasoning under the header **Rules Analysis:** addressing the aspects be
 
 Perform the following actions per §2.5 `{RULES_FILE}` Standards:
 1. Analyze for universal execution patterns across all planning sources:
-   - **From the Spec:** execution patterns implied by design decisions, not the design content itself. Specific outputs, formats, values, and schemas defined by design decisions remain in the Spec - they reach Workers through Task Prompts.
+   - **From the Spec:** execution patterns implied by design decisions, not the design content itself. Specific outputs, formats, values, and schemas defined by design decisions remain in the Spec - they reach subagents through Task Prompts.
    - **From the Plan:** patterns recurring across multiple Task guidance fields.
    - **From gathered context:** workflow preferences, conventions, or quality requirements from Context Gathering not yet captured in the Spec or the Plan. Version control conventions are excluded - the Manager handles those and appends content to Rules during the start of the Implementation Phase.
-   - **Classification:** Separate patterns that apply to all or most Tasks from narrowly Task-specific ones per §2.5 `{RULES_FILE}` Standards. Most projects produce few genuinely universal rules - project-specific constraints and output specifications belong in the Spec or Task guidance even when they apply to multiple Workers.
+   - **Classification:** Separate patterns that apply to all or most Tasks from narrowly Task-specific ones per §2.5 `{RULES_FILE}` Standards. Most projects produce few genuinely universal rules - project-specific constraints and output specifications belong in the Spec or Task guidance even when they apply to multiple subagents.
    - **Existing standards:** what `{RULES_FILE}` already contains; reference rather than duplicate.
 2. Read `{RULES_FILE}` (or confirm it does not exist), then write the APM_RULES block per §4.3 APM_RULES Block:
    - If file exists: preserve existing content outside block, append APM_RULES block.
