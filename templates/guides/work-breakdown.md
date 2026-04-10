@@ -12,7 +12,7 @@ This guide defines the process for Work Breakdown, which transforms gathered con
 - *Plan:* Stage and Task breakdown with Worker assignments, validation criteria, dependency chains, and Dependency Graph.
 - *`{RULES_FILE}`:* Universal execution-level Rules applied during Task execution.
 
-All context gathered during Context Gathering must be captured across these three artifacts. If you omit gathered context from all three, justify why it is not needed for execution - the Manager and Workers operate from these documents alone. How context maps to each document is governed by §2.1 Workflow Context. Decomposition granularity adapts to project size and complexity - smaller projects warrant lighter breakdown, larger projects may need more detail.
+All context gathered during Context Gathering must be captured across these three artifacts. If you omit gathered context from all three, justify why it is not needed for execution - the Manager and subagents operate from these documents alone. How context maps to each document is governed by §2.1 Workflow Context. Decomposition granularity adapts to project size and complexity - smaller projects warrant lighter breakdown, larger projects may need more detail.
 
 ---
 
@@ -20,13 +20,15 @@ All context gathered during Context Gathering must be captured across these thre
 
 ### 2.1 Workflow Context
 
-From Context Gathering's §2.1 Workflow Context, you know these documents serve different audiences and that the Manager handles all coordination at runtime. Workers should not be aware of the Spec, Plan, Tracker, or Index - they see only their Task Prompt, Rules, and what they accumulate during execution. Content reaches Workers only through the Manager's extraction into Task Prompts, so your placement decisions here determine what Workers eventually work with. This section deepens that awareness into the placement decisions you make during decomposition.
+From Context Gathering's §2.1 Workflow Context, you know these documents serve different audiences and that the Manager handles all coordination at runtime. Subagents should not be aware of the Spec, Plan, Tracker, or Index - they see only their Task Prompt and Rules. Content reaches subagents only through the Manager's extraction into Task Prompts, so your placement decisions here determine what subagents eventually work with. This section deepens that awareness into the placement decisions you make during decomposition.
 
-**How the Spec is used:** The Manager reads the Spec and extracts relevant content per-Task into self-contained Task Prompts for Workers. Design decisions should be at the level the Manager needs for extraction - not implementation mechanics.
+**How the Spec is used:** The Manager reads the Spec and extracts relevant content per-Task into self-contained Task Prompts for subagents. Design decisions should be at the level the Manager needs for extraction - not implementation mechanics.
 
 **How the Plan is used:** The Manager uses the Plan for coordination and Task Prompt construction. Task guidance provides the domain-specific substance the Manager wraps into Task Prompts. When Task guidance shares design decisions already captured in the Spec, reference the relevant Spec section rather than restating - the Manager reads both documents and integrates Spec content into Task Prompts during extraction. Task guidance adds what the Spec does not cover (domain-specific implementation context, constraints, and patterns). The Manager enriches Task Prompts at runtime with workspace context, findings from completed work, and cross-domain coordination notes. Task guidance provides what planning can determine; the Manager adds what only runtime reveals.
 
-**How Rules are used:** Rules are the only planning-time document Workers read directly. Because Workers should not be aware of the Spec or Plan, Rules must be self-contained. Embed content directly, do not reference the Spec, Plan, or external authoritative documents by path.
+**How Rules are used:** Rules are auto-loaded into every subagent context via CLAUDE.md. Because subagents should not be aware of the Spec or Plan, Rules must be self-contained. Embed content directly, do not reference the Spec, Plan, or external authoritative documents by path.
+
+**Subagent execution model:** Tasks are executed by ephemeral subagents spawned by the Manager. Each subagent starts with no prior project context beyond CLAUDE.md - the Manager provides all necessary context in the Task Prompt. Subagents have no accumulated working memory from previous tasks, except within a batch where the same subagent executes multiple sequential tasks. This shapes decomposition: each task should be scoped for completion within a single subagent's context window (there is no handoff mechanism for subagents), and sequential same-domain tasks benefit from batch-friendly ordering where the Manager can group them into a single dispatch.
 
 **Coordination is runtime:** The Manager determines how work gets dispatched - sequencing, parallel execution, grouping - at runtime based on the Plan's structure. The Manager establishes version control conventions during the Implementation Phase. The Plan captures work structure; the Manager reads coordination opportunities from it.
 
@@ -36,17 +38,17 @@ From Context Gathering's §2.1 Workflow Context, you know these documents serve 
 
 These principles apply across all decomposition levels. Adapt granularity to project size and complexity.
 
-**Domains:** Identify logical work domains from Context Gathering. Split when domains involve different expertise or mental models. Combine when domains share tight context and dependencies. When balanced, prefer separation. Integrate User preferences.
+**Domains:** Identify logical work domains from Context Gathering. Each domain maps to a Worker Group (one or more ephemeral subagents sharing a domain context). Split when domains involve different expertise or mental models. Combine when domains share tight context and dependencies. When balanced, prefer separation. Integrate User preferences.
 
 **Stages:** Sequential milestone groupings - Stage N+1 begins after Stage N completes. Each Stage delivers coherent value. Split when work streams are unrelated or intermediate deliverables block subsequent work. Combine when separation is artificial. When balanced, prefer fewer Stages with clear milestones. When domains can work in parallel, structure that as parallel Tasks within a single Stage rather than parallel Stages.
 
-**Tasks:** Derive from Stage objectives. Each Task produces a meaningful deliverable, scoped to one Worker's domain, with specified validation criteria. Split when a Task spans domains or bundles unrelated deliverables. Combine when micro-tasks create overhead without value. Include subagent steps for investigation or research.
+**Tasks:** Derive from Stage objectives. Each Task produces a meaningful deliverable, scoped to one Worker Group's domain, with specified validation criteria. Tasks should be scoped for completion within a single subagent's context window - there is no handoff mechanism for subagents. Split when a Task spans domains or bundles unrelated deliverables. Combine when micro-tasks create overhead without value.
 
 **Steps:** Organize work within a Task for failure tracing. Ordered, discrete, sharing the Task's validation. If a step needs independent validation, split the Task.
 
-**Scope boundaries:** Worker-assignable work is completable within the development environment and verifiable autonomously. User coordination involves external platforms, credentials, or validation requiring human judgment - include explicit coordination steps and note where User involvement is needed.
+**Scope boundaries:** Subagent-assignable work is completable within the development environment and verifiable autonomously. User coordination involves external platforms, credentials, or validation requiring human judgment - include explicit coordination steps and note where User involvement is needed. When criteria require User involvement, the subagent returns with Partial status and the Manager mediates.
 
-**Validation criteria:** Each Task specifies concrete pass/fail criteria tied to its deliverables - what to check and how. Criteria the Worker can verify autonomously (tests pass, outputs exist with correct structure, behavior matches requirements) allow autonomous iteration. Criteria requiring User involvement - judgment (design approval, content quality) or action (running external checks, confirming platform behavior) - require the Worker to pause. Most Tasks combine multiple criteria. Validation criteria are Worker-scoped - no references to other Stages, Tasks, or coordination-level gates. Workers validate their own deliverables; holistic verification beyond individual Tasks - milestone checks, acceptance gates, end-to-end validation - is the Manager's runtime responsibility. When Context Gathering surfaced observations about holistic verification needs, include them in Plan notes per §2.1 Workflow Context - the Manager acts on them at runtime, not as planned Tasks.
+**Validation criteria:** Each Task specifies concrete pass/fail criteria tied to its deliverables - what to check and how. Criteria the subagent can verify autonomously (tests pass, outputs exist with correct structure, behavior matches requirements) allow autonomous iteration. Criteria requiring User involvement - judgment (design approval, content quality) or action (running external checks, confirming platform behavior) - cause the subagent to return with Partial status for Manager mediation. Most Tasks combine multiple criteria. Validation criteria are subagent-scoped - no references to other Stages, Tasks, or coordination-level gates. Subagents validate their own deliverables; holistic verification beyond individual Tasks - milestone checks, acceptance gates, end-to-end validation - is the Manager's runtime responsibility. When Context Gathering surfaced observations about holistic verification needs, include them in Plan notes per §2.1 Workflow Context - the Manager acts on them at runtime, not as planned Tasks.
 
 ### 2.3 Spec Standards
 
@@ -66,23 +68,23 @@ The Plan defines how work is organized - Stages, Tasks, Worker assignments, depe
 
 **Content placement:** Task-level content - objectives, deliverables, Worker assignments, validation criteria, dependencies, step-by-step guidance. Design decisions across Tasks belong in the Spec; universal execution patterns belong in Rules.
 
-**Task self-sufficiency:** Each Task must contain enough context for a Worker to execute from a Task Prompt alone per §2.1 Workflow Context.
+**Task self-sufficiency:** Each Task must contain enough context for a subagent to execute from a Task Prompt alone per §2.1 Workflow Context.
 
-**Guidance and steps:** When Task guidance involves design decisions already captured in the Spec, reference the Spec section rather than restating the content. The Manager reads both documents and integrates Spec content into the Task Prompt during extraction - restating duplicates work and risks divergence. Guidance adds what the Spec does not cover (domain-specific implementation context, constraints, and patterns). Authoritative User documents follow the same principle - reference by path and section. Steps describe the Worker's sequential operations - the Manager transforms them into actionable instructions enriched with Spec content and guidance.
+**Guidance and steps:** When Task guidance involves design decisions already captured in the Spec, reference the Spec section rather than restating the content. The Manager reads both documents and integrates Spec content into the Task Prompt during extraction - restating duplicates work and risks divergence. Guidance adds what the Spec does not cover (domain-specific implementation context, constraints, and patterns). Authoritative User documents follow the same principle - reference by path and section. Steps describe the subagent's sequential operations - the Manager transforms them into actionable instructions enriched with Spec content and guidance.
 
-**Dispatch-aware structuring:** The Manager dispatches work in three modes (single Tasks, batches of sequential same-Worker Tasks grouped together, and parallel dispatch units sent to different Workers simultaneously). When assignments and Task ordering could go multiple ways, prefer arrangements that maximize dispatch opportunities - Tasks that can proceed independently, groups that chain naturally within a domain, work that can happen in parallel across domains. The Manager determines which mode to use at runtime based on the Plan's structure.
+**Dispatch-aware structuring:** The Manager dispatches work in three modes (single Tasks, batches of sequential same-group Tasks as one subagent, and parallel dispatch units as multiple concurrent subagents). When assignments and Task ordering could go multiple ways, prefer arrangements that maximize dispatch opportunities - Tasks that can proceed independently, groups that chain naturally within a domain for batch-friendly sequencing, work that can happen in parallel across domains. Sequential tasks within the same Worker Group benefit most from batch dispatch: the subagent retains working familiarity across the batch, reducing dependency context cost. The Manager determines which mode to use at runtime based on the Plan's structure.
 
 ### 2.5 `{RULES_FILE}` Standards
 
-`{RULES_FILE}` defines how work is performed - execution patterns that apply across all or most Tasks. Workers receive the entire file during Task execution, not just the APM Rules block. The block is a namespace to separate APM-managed standards from pre-existing content.
+`{RULES_FILE}` defines how work is performed - execution patterns that apply across all or most Tasks. Claude Code auto-loads `{RULES_FILE}` into every subagent context. The APM Rules block is a namespace to separate APM-managed standards from pre-existing content.
 
-**Content placement:** Rules capture how work is performed - not what is being built. Output formats, response strings, data schemas, and interface contracts define what is being built and belong in the Spec even when multiple Workers need them. Execution patterns belong here when they apply to all or most Tasks - narrowly domain-specific patterns are better placed in Task guidance. When uncertain, prefer Task guidance - easier to promote later than to demote.
+**Content placement:** Rules capture how work is performed - not what is being built. Output formats, response strings, data schemas, and interface contracts define what is being built and belong in the Spec even when multiple subagents need them. Execution patterns belong here when they apply to all or most Tasks - narrowly domain-specific patterns are better placed in Task guidance. When uncertain, prefer Task guidance - easier to promote later than to demote.
 
-**Writing style:** All Workers read the same Rules file. Write rules so any Worker can determine whether a rule applies to its current work. Frame rules conditionally on the work being performed rather than on a specific Worker or domain - a Worker touching multiple domains should apply the right rules to each naturally.
+**Writing style:** All subagents read the same Rules file. Write rules so any subagent can determine whether a rule applies to its current work. Frame rules conditionally on the work being performed rather than on a specific domain - a subagent touching multiple areas should apply the right rules to each naturally.
 
 **Pre-existing content:** When `{RULES_FILE}` already contains User standards, reference relevant pre-existing rules from the APM Rules block rather than duplicating. Do not modify pre-existing content unless the User explicitly requests it.
 
-**Self-containedness:** Workers' working context is intentionally scoped to their Task Prompt and `{RULES_FILE}` - the Spec, Plan, and external design artifacts are omitted by design. Standards referencing those documents undermine that scoping. Embed content directly.
+**Self-containedness:** Subagents' working context is intentionally scoped to their Task Prompt and `{RULES_FILE}` - the Spec, Plan, and external design artifacts are omitted by design. Standards referencing those documents undermine that scoping. Embed content directly.
 
 ---
 
@@ -116,27 +118,27 @@ Present reasoning under the header **Plan Analysis:** with sub-headers **Domain 
    - *Domain Analysis.* Grounded in the Spec approved above:
      - Logical work domains and their scope.
      - Why domains are separated or combined.
-     - How domains map to Workers with proposed names and responsibilities.
+     - How domains map to Worker Groups with proposed names and scope. Each Worker Group represents one or more ephemeral subagents sharing a domain context.
      Update Plan header Workers field.
-   - *Stage Structure.* Starting from the domains identified above, reason about how the project's work sequences into Stages. Where do the domain boundaries, dependency chains, or deliverable milestones create natural progression points? Each Stage is a sequential milestone grouping - Stage N+1 begins only after Stage N completes. Parallelism happens within a Stage (parallel Tasks across Workers), not across Stages. Present the sequencing rationale and what each Stage delivers before analyzing individual Stages. Update Plan header Stages field.
+   - *Stage Structure.* Starting from the domains identified above, reason about how the project's work sequences into Stages. Where do the domain boundaries, dependency chains, or deliverable milestones create natural progression points? Each Stage is a sequential milestone grouping - Stage N+1 begins only after Stage N completes. Parallelism happens within a Stage (parallel Tasks across Worker Groups), not across Stages. Present the sequencing rationale and what each Stage delivers before analyzing individual Stages. Update Plan header Stages field.
    - *Stage N.* For each Stage:
      - *Stage deliverables and Task mapping.* What deliverables this Stage requires to meet its milestone. How those deliverables map to Tasks: which are distinct enough to warrant separate Tasks, which are tightly coupled enough to combine into one, and which can proceed independently vs sequentially. When a deliverable spans domains, split into per-domain Tasks with cross-agent dependencies. When a deliverable is large, split into sequential Tasks that build toward it. When deliverables share tight context or dependencies, combine them to reduce coordination overhead. Present the mapping reasoning, then name the Tasks that emerge - what each one produces, and why each exists as a separate unit of work.
      - *Per-Task analysis.* For each Task:
-       - *Worker assignment:* which Worker and why.
+       - *Worker Group assignment:* which Worker Group and why.
        - *Task scope:* what is the Task's scope? Is the User involved in any steps?
-       - *Task guidance:* implementation context the Worker needs, including domain-specific patterns (how to structure code, existing patterns to follow), constraints (performance, security, dependencies), technical decisions (library choices, API contracts), single-domain details (validation approach, testing strategy, error handling specifics). Include context classified as Task-scoped per §3.1 Spec Analysis. For design decisions already in the Spec, reference the Spec section per §2.4 Plan Standards rather than restating, adding domain-specific context as needed.
+       - *Task guidance:* implementation context the subagent needs, including domain-specific patterns (how to structure code, existing patterns to follow), constraints (performance, security, dependencies), technical decisions (library choices, API contracts), single-domain details (validation approach, testing strategy, error handling specifics). Include context classified as Task-scoped per §3.1 Spec Analysis. For design decisions already in the Spec, reference the Spec section per §2.4 Plan Standards rather than restating, adding domain-specific context as needed.
        - *Task validation:* concrete criteria that verify the Task's deliverables - what to check and how. Note where User involvement is needed. Validation criteria co-define the Task with Guidance.
-       - *Dependencies:* same-agent as `Task N.M`, cross-agent as **`Task N.M by <Agent>`** (bolded), specifying the deliverable at the boundary.
+       - *Dependencies:* listed as `Task N.M` specifying the deliverable at the boundary. All dependencies are structural relationships - context depth classification (intra-batch vs cross-dispatch) is determined by the Manager at dispatch time.
        - *Steps:* ordered operations building toward Task completion.
      Every Task aspect must be addressed - depth varies with complexity but coverage does not. Steps incorporate guidance. After each Stage, assess whether each Task represents independently validatable work per §2.2 Decomposition Principles.
-   - *Dependency Analysis.* After all Stages are analyzed, verify all cross-agent dependencies are correctly identified. Cross-check agent assignments - if a dependency's producer differs from the consumer's agent, it is a cross-agent dependency. Reason through the dependency audit (list, classify, flag misclassified) and cross-agent chains (provider, consumer, agents, required deliverable). Fix any misclassified dependencies. Describe dependencies by their relationship - not by graph rendering properties. Graph formatting is applied during the write step.
-   - *Pre-write checks.* Verify the analysis is complete: every Task was analyzed with all aspects covered (Worker assignment, scope, guidance, validation, dependencies, steps), workload is reasonably distributed across Workers, all cross-agent dependencies are identified, and notes for the Manager are ready per §2.1 Workflow Context. Correct issues before proceeding.
-2. Read `.apm/plan.md`, then write the full Plan per §4.2 Plan Format. Set `title` to the project name (same as Spec) and `modified` to "Plan creation by the Planner." Enrich Task details from reasoning. Ensure every cross-agent dependency is bolded at write time. Include the Dependency Graph in the Plan header.
+   - *Dependency Analysis.* After all Stages are analyzed, verify all dependencies are correctly identified. Cross-check that every referenced Task exists and that the dependency deliverable is correctly described. Describe dependencies by their structural relationship. Graph formatting is applied during the write step.
+   - *Pre-write checks.* Verify the analysis is complete: every Task was analyzed with all aspects covered (Worker Group assignment, scope, guidance, validation, dependencies, steps), workload is reasonably distributed across Worker Groups, all dependencies are identified, and notes for the Manager are ready per §2.1 Workflow Context. Correct issues before proceeding.
+2. Read `.apm/plan.md`, then write the full Plan per §4.2 Plan Format. Set `title` to the project name (same as Spec) and `modified` to "Plan creation by the Planner." Enrich Task details from reasoning. Include the Dependency Graph in the Plan header.
 3. Pause for User review:
    - State the Plan is complete and the artifact is created. Present a summary to the User: Worker count, Stage count with names and Task counts, total Tasks, dispatch patterns.
    - Ask User to review the Plan.
    - If modifications needed, apply and repeat step 3.
-   - If approved, proceed to §3.3 Rules Analysis.
+   - If approved, continue to §3.3 Rules Analysis.
 
 ### 3.3 Rules Analysis
 
@@ -194,7 +196,7 @@ modified: <last modification note>
 ---
 ```
 
-Below the frontmatter, the document starts with `# APM Plan` followed by the Plan header: `## Workers` (table with `| Worker | Domain | Description |`), `## Stages` (table with `| Stage | Name | Tasks | Agents |`), and `## Dependency Graph` (mermaid diagram per **Dependency Graph Format** below). A single horizontal rule separates the header from Stage sections below. No other horizontal rules in the Plan - `##` and `###` headings provide sufficient visual separation between Stages and Tasks.
+Below the frontmatter, the document starts with `# APM Plan` followed by the Plan header: `## Workers` (table with `| Worker Group | Domain | Description |`), `## Stages` (table with `| Stage | Name | Tasks | Groups |`), and `## Dependency Graph` (mermaid diagram per **Dependency Graph Format** below). A single horizontal rule separates the header from Stage sections below. No other horizontal rules in the Plan - `##` and `###` headings provide sufficient visual separation between Stages and Tasks.
 
 - *Planner notes:* Placed immediately after the horizontal rule separator, before Stage sections. Use the format `> **Notes:** <prose or unordered list>`. These cover what you observed about the work structure per §2.1 Workflow Context - why boundaries exist, natural groupings or sequencing patterns, critical path, convergence points, and Stage boundaries where holistic verification may be valuable.
 
@@ -205,7 +207,7 @@ Below the frontmatter, the document starts with `# APM Plan` followed by the Pla
 
 **Task Format.** Each Task in the Plan:
 
-*Header:* `### Task <N>.<M>: <Title> - <Domain> Agent`
+*Header:* `### Task <N>.<M>: <Title> - <Worker Group>`
 
 *Contents:*
 ```markdown
@@ -213,13 +215,13 @@ Below the frontmatter, the document starts with `# APM Plan` followed by the Pla
 * **Output:** [Concrete deliverables - files, components, artifacts produced.]
 * **Validation:** [Concrete pass/fail criteria. Note where User involvement is needed.]
 * **Guidance:** [Technical constraints, approach specifications, references to existing patterns, User collaboration patterns.]
-* **Dependencies:** [Prior Task outputs required. Use `Task N.M by <Domain> Agent, ...` format. Bold cross-agent dependencies. Use "None" when no dependencies exist.]
+* **Dependencies:** [Prior Task outputs required. Use `Task N.M, ...` format. Use "None" when no dependencies exist.]
 
 1. [Step description]
 2. [Step description]
 ```
 
-**Step Format:** Each step is a numbered instruction describing a discrete operation. Steps are sequential operations; Guidance is context and constraints that inform how those operations are performed. Keep them separate - steps reference Guidance implicitly, not by embedding it. Include clear, specific instructions that a Worker can execute directly. Reference patterns, files, or prior work when relevant. When investigation, exploration, or research is needed, include a subagent step describing purpose and scope (e.g., "Spawn a debug subagent to isolate the rendering issue" or "Spawn a research subagent to verify the current API authentication patterns").
+**Step Format:** Each step is a numbered instruction describing a discrete operation. Steps are sequential operations; Guidance is context and constraints that inform how those operations are performed. Keep them separate - steps reference Guidance implicitly, not by embedding it. Include clear, specific instructions that a subagent can execute directly. Reference patterns, files, or prior work when relevant. Subagents cannot spawn nested subagents - steps describe work the subagent performs directly. When a step involves investigation or research, describe the investigation the subagent should perform (e.g., "Investigate the rendering issue by reading the component tree and tracing state flow" rather than "Spawn a debug subagent").
 
 **Dependency Graph Format:** The Dependency Graph is a mermaid diagram in the Plan header that visualizes Task dependencies, agent assignments, and execution flow. It enables the Manager to identify batch candidates, parallel dispatch opportunities, critical path bottlenecks, and coordination points.
 
@@ -238,8 +240,8 @@ subgraph S2["Stage 2: <Name>"]
   T2_2["2.2 <Title><br/><i><Agent C></i>"]
 end
 
-T1_2 -.-> T2_1
-T1_2 -.-> T2_2
+T1_2 --> T2_1
+T1_2 --> T2_2
 
 style T1_1 fill:#2d6a4f,color:#000
 style T1_2 fill:#2d6a4f,color:#000
@@ -247,13 +249,13 @@ style T2_1 fill:#f4a261,color:#000
 style T2_2 fill:#a8dadc,color:#000
 ```
 
-The graph makes dispatch patterns visible to the Manager: same-agent chains indicate batch candidates, independent cross-agent nodes indicate parallel candidates, and dotted edges mark cross-agent coordination points where one Worker's output feeds another's input.
+The graph makes dispatch patterns visible to the Manager: same-group chains indicate batch candidates, independent nodes across groups indicate parallel candidates, and edges show where one group's output feeds another's input.
 
-*Node format:* `T<Stage>_<Task>["<Task ID> <Title><br/><i><Agent Name></i>"]`
+*Node format:* `T<Stage>_<Task>["<Task ID> <Title><br/><i><Group Name></i>"]`
 
-*Edge rules.* Same-agent dependencies use `-->` (solid). Cross-agent dependencies use `-.->` (dotted). Only direct dependencies - do not draw transitive closure.
+*Edge rules.* All dependencies use `-->` (solid arrows). Only direct dependencies - do not draw transitive closure. Dependency context depth (intra-batch vs cross-dispatch) is a runtime concern, not a graph property.
 
-*Styling:* Assign each agent a consistent fill color across all its Task nodes. Apply colors via `style T<S>_<T> fill:<color>` statements after all subgraphs, ordered by Worker appearance in the Plan Workers field. Use text color #000 and select fill colors with sufficient contrast for readability.
+*Styling:* Assign each Worker Group a consistent fill color across all its Task nodes. Apply colors via `style T<S>_<T> fill:<color>` statements after all subgraphs, ordered by Worker Group appearance in the Plan Workers field. Use text color #000 and select fill colors with sufficient contrast for readability.
 
 ### 4.3 APM_RULES Block
 
@@ -273,12 +275,12 @@ APM_RULES {
 
 ## 5. Common Mistakes
 - *Under-specification:* Design decisions left implicit - if it could reasonably go multiple ways, document the chosen direction.
-- *Spec absorbing decomposition:* The Spec capturing how work is decomposed (Worker assignments, Task structure, Stage sequencing) instead of what is being built. Workers, Stages, and Task structure are Plan concerns - the Spec stays at the design decision level.
+- *Spec absorbing decomposition:* The Spec capturing how work is decomposed (Worker Group assignments, Task structure, Stage sequencing) instead of what is being built. Worker Groups, Stages, and Task structure are Plan concerns - the Spec stays at the design decision level.
 - *Validation as afterthought:* "Works correctly" is not a criterion. Each Task needs concrete measures - what to check, how to check it, and what the pass/fail boundary is. Vague criteria produce vague validation.
-- *Misclassified dependencies:* Cross-agent dependencies not bolded, same-agent dependencies incorrectly bolded, or wrong edge types in the Dependency Graph - classify at write time by checking whether producer and consumer share the same agent.
+- *Missing dependencies:* Dependencies omitted from the Plan or Dependency Graph. Verify every Task-to-Task relationship is captured - the Manager relies on complete dependency information for dispatch decisions.
 - *Skipped approval gate:* Each document has its own analyze-write-approve cycle. The User reviews and approves each document before the next begins. Producing multiple documents without pausing, or proceeding to the next document without User approval, breaks the cycle.
 - *Restating Spec content in Task guidance:* When Task guidance repeats design decisions already in the Spec, both you and the Manager maintain redundant content that can diverge. Reference the Spec section in Task guidance - the Manager reads both documents and integrates Spec content into Task Prompts during extraction.
-- *Rules that reference coordination-level documents:* Workers should not be aware of the Spec, Plan, Tracker, or Index. A rule that says "per the Spec" or "as defined in the Plan" references documents the Worker has never read. Embed the content directly.
+- *Rules that reference coordination-level documents:* Subagents should not be aware of the Spec, Plan, Tracker, or Index. A rule that says "per the Spec" or "as defined in the Plan" references documents the subagent has never read. Embed the content directly.
 - *Misplaced notes:* Work structure observations (parallelism, dispatch patterns, decomposition rationale) belong in Plan notes, not Spec notes. Project environment observations (workspace constraints, version control patterns) belong in Spec notes, not Plan notes.
 - *Notes as instructions:* Notes inform the Manager's awareness, not its actions. Observations about what exists and why, not directives about what to do.
 - *Analysis presented as predetermined:* Visible reasoning in chat must show how conclusions were reached, not present them as already decided. Internal reasoning or thinking may reach conclusions first, but the visible analysis must still walk through the reasoning for the User to review.

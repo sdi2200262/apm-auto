@@ -58,13 +58,8 @@ The `.apm/` directory contains fresh templates created by `apm init` - Spec, Pla
 **Prerequisite:** Work Breakdown Procedure must be complete with all planning documents approved.
 
 Perform the following actions:
-1. Initialize the Message Bus. Read the Plan to identify all Workers defined in the Workers field. For each Worker, derive the agent slug (lowercase, hyphenated name) per `{SKILL_PATH:apm-communication}` §4.3 Agent Slug Format and create the agent directory:
-   - Create directory: `.apm/bus/<agent-slug>/`
-   - Create empty Task Bus: `.apm/bus/<agent-slug>/task.md`
-   - Create empty Report Bus: `.apm/bus/<agent-slug>/report.md`
-   - Create empty Handoff Bus: `.apm/bus/<agent-slug>/handoff.md`
-   Create the Manager's bus directory: `.apm/bus/manager/` with empty Handoff Bus `.apm/bus/manager/handoff.md`. Create all directories and bus files using `mkdir -p` and `touch` in a single terminal command.
-2. State the Planning Phase is complete: planning documents created, Message Bus initialized, agents ready for coordination. Direct the User to start the Implementation Phase by initiating the Manager with `/apm-2-initiate-manager` in a new chat.
+1. Initialize the Manager's Handoff Bus. Create the bus directory and file: `mkdir -p .apm/bus/manager && touch .apm/bus/manager/handoff.md`.
+2. State the Planning Phase is complete: planning documents created, Manager Handoff Bus initialized, ready for coordination. Direct the User to start the Implementation Phase by initiating the Manager with `/apm-2-initiate-manager` in a new chat.
 
 ---
 

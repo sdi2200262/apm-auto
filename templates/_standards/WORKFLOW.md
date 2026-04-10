@@ -33,7 +33,7 @@ APM is a multi-agent project management framework. This adaptation targets Claud
 
 ### 2.1 Planning Phase
 
-The Planner transforms User requirements into planning documents through two sequential procedures: Context Gathering, then Work Breakdown. After the User approves all three planning documents, the Planner directs the User to start the Implementation Phase by initiating the Manager in a new chat.
+The Planner transforms User requirements into planning documents through two sequential procedures: Context Gathering, then Work Breakdown. After the User approves all three planning documents, the Planner initializes the Manager's Handoff Bus at `.apm/bus/manager/handoff.md` and directs the User to start the Implementation Phase by initiating the Manager in a new chat.
 
 ### 2.2 Implementation Phase
 
@@ -112,7 +112,7 @@ Agent communication follows two models based on audience:
 
 ### 4.2 Manager Handoff Bus
 
-The Handoff Bus is a file-based communication mechanism at `.apm/bus/manager/handoff.md`. It is the only bus file in this adaptation. The Manager creates it during first initialization if it does not exist. It is either empty (no handoff pending) or contains a handoff prompt for the incoming Manager instance. The outgoing Manager writes the handoff prompt; the incoming Manager reads and clears it during initialization.
+The Handoff Bus is a file-based communication mechanism at `.apm/bus/manager/handoff.md`. It is the only bus file in this adaptation. The Planner creates it at the end of the Planning Phase. It is either empty (no handoff pending) or contains a handoff prompt for the incoming Manager instance. The outgoing Manager writes the handoff prompt; the incoming Manager reads and clears it during initialization.
 
 ---
 
