@@ -231,13 +231,13 @@ graph TB
 
 subgraph S1["Stage 1: <Name>"]
   direction LR
-  T1_1["1.1 <Title><br/><i><Agent A></i>"] --> T1_2["1.2 <Title><br/><i><Agent A></i>"]
+  T1_1["1.1 <Title><br/><i><Group A></i>"] --> T1_2["1.2 <Title><br/><i><Group A></i>"]
 end
 
 subgraph S2["Stage 2: <Name>"]
   direction LR
-  T2_1["2.1 <Title><br/><i><Agent B></i>"]
-  T2_2["2.2 <Title><br/><i><Agent C></i>"]
+  T2_1["2.1 <Title><br/><i><Group B></i>"]
+  T2_2["2.2 <Title><br/><i><Group C></i>"]
 end
 
 T1_2 --> T2_1
