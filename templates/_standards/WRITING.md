@@ -63,7 +63,7 @@ Active voice ("The Manager creates..." not "is created"). No emotional anthropom
 
 **Standards files** (`_standards/`): Third person throughout. Standards describe how agents behave and how the workflow operates - they do not instruct a runtime reader. "The Manager assesses cascade implications" not "Assess cascade implications." "Subagents iterate on failure" not "Iterate on failure." Instructional language directed at template maintainers is acceptable ("Prefer X over Y", "Use X format") because standards address maintainers, not runtime agents.
 
-**Runtime files** (commands, guides, skills): Second person and imperative mood when addressing the reading agent. "Perform the following actions" not "The subagent performs the following actions." "You operate with scoped context" not "Subagents operate with scoped context." Third person for OTHER agents - a guide read by the Manager uses third person for subagents ("Subagents do not reference the Plan") and second person for the Manager ("Extract relevant Spec content"). The execution and logging guides are read by subagents and use second person for the subagent. Skills read by multiple agent roles use third person when distinguishing specific roles ("The Manager coordinates merges; subagents commit to their branch") since no single reader is the exclusive audience.
+**Runtime files** (commands, guides, skills, agents): Second person and imperative mood when addressing the reading agent. "Perform the following actions" not "The subagent performs the following actions." "You operate with scoped context" not "Subagents operate with scoped context." Third person for OTHER agents - a guide read by the Manager uses third person for subagents ("Subagents do not reference the Plan") and second person for the Manager ("Extract relevant Spec content"). The `apm-worker` agent definition is read by subagents and uses second person for the subagent. Skills read by multiple agent roles use third person when distinguishing specific roles ("The Manager coordinates merges; subagents commit to their branch") since no single reader is the exclusive audience.
 
 ### 2.3 Neutrality
 
@@ -158,7 +158,7 @@ References use "See" or "per" exclusively. References appear inline within prose
 
 Terms are used exactly as defined in `TERMINOLOGY.md`. Synonyms are not used. `TERMINOLOGY.md` terms are always capitalized and carry formal defined meaning - they are the APM vocabulary. All other language is natural: standard English capitalization applies (headings, procedural labels, proper nouns) but confers no formal status. There is no intermediate category between formal vocabulary and natural language.
 
-Defined concepts (same-agent/cross-agent dependencies, dispatch modes) are explained through their implications in natural prose - not elevated through naming conventions. Singular form is used when referring to the concept; plural when referring to multiple instances.
+Defined concepts (intra-batch/cross-dispatch dependencies, dispatch modes) are explained through their implications in natural prose - not elevated through naming conventions. Singular form is used when referring to the concept; plural when referring to multiple instances.
 
 ---
 

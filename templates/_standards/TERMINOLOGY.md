@@ -84,7 +84,7 @@ Partial means "I need guidance to continue" or "User judgment is required." Fail
 | **Context Gathering** | Planner elicits requirements through structured question rounds and produces a consolidated summary for User review. |
 | **Work Breakdown** | Planner decomposes gathered context into Spec, Plan, and Rules. |
 | **Task Assignment** | Manager assesses readiness, determines dispatch mode, classifies dependencies, constructs Task Prompts, and spawns subagents via `Agent()`. |
-| **Task Execution** | Subagent receives a Task Prompt, reads execution and logging guides, executes instructions, validates results, iterates if needed, and logs the outcome to memory. |
+| **Task Execution** | Subagent receives a Task Prompt within the `apm-worker` agent context (which provides behavioral rules as the system prompt), executes instructions, validates results, iterates if needed, and logs the outcome to memory. |
 | **Task Review** | Manager reads subagent return value and Task Log, determines review outcome, modifies planning documents when findings warrant it, and updates the Tracker. |
 | **Task Logging** | Subagent writes a structured Task Log capturing outcome, validation, deliverables, and flags, then returns a structured result summary. |
 | **Handoff** | Context transfer between successive Manager instances when context window limits approach. Manager-only. |
