@@ -12,16 +12,14 @@ It is designed for prototyping, fast execution, and simpler projects where the o
 
 ## Installation
 
+Navigate to your project directory, initialize through the `agentic-pm CLI`,
+
 ```bash
 npm install -g agentic-pm
 apm custom -r sdi2200262/apm-auto
 ```
 
-Navigate to your project directory, initialize, and start planning:
-
-```bash
-apm init
-```
+Open Claude Code and start planning:
 
 ```
 /apm-1-initiate-planner
