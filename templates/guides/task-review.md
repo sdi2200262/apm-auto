@@ -56,7 +56,7 @@ When multiple subagents are dispatched in parallel, coordinate after all return.
 
 **Immediate reassessment:** After processing results, reassess readiness and continue to dispatch assessment in the same turn - review and next dispatch happen in a single response without waiting for User input. The only reasons to pause are when no Tasks are Ready (wait state) or when a modification requires User collaboration per §2.2 Review Outcome Standards.
 
-**Parallel result handling:** During parallel dispatch, all `Agent()` calls return together (the Manager blocks until all complete). Process each result - complete the review, merge if needed, reassess readiness, dispatch newly Ready Tasks. Each review-to-dispatch cycle is continuous.
+**Parallel result handling:** During parallel dispatch, all `Agent()` calls return together (you block until all complete). Process each result - complete the review, merge if needed, reassess readiness, dispatch newly Ready Tasks. Each review-to-dispatch cycle is continuous.
 
 **Merge coordination:** After successful review during parallel dispatch, merge the completed Task's branch per §2.5 Merge Standards before dispatching dependent Tasks. At Stage end, perform a merge sweep per §2.5 Merge Standards.
 
@@ -104,7 +104,7 @@ After all Tasks in a Stage are Done, assess whether the Stage's deliverables req
 
 ## 3. Task Review Procedure
 
-Three sequential steps per report (processing, log review, outcome determination), with conditional branches for planning document modification and Stage summary creation. Update the Tracker after each cycle.
+Three sequential steps per result (processing, log review, outcome determination), with conditional branches for planning document modification and Stage summary creation. Update the Tracker after each cycle.
 
 ### 3.1 Result Processing
 
@@ -170,7 +170,7 @@ Perform the following actions:
 
 ### 4.1 Task Tracking Format
 
-The Task Tracking section within the Tracker tracks Task statuses, agent assignments, and branch state per Stage. Update after each review cycle.
+The Task Tracking section within the Tracker tracks Task statuses, domain assignments, and branch state per Stage. Update after each review cycle.
 
 **Location:** `## Task Tracking` section of `.apm/tracker.md`.
 
@@ -265,7 +265,7 @@ modified: Task 2.3 scope clarified based on task-02-02.log.md findings. Modified
 
 **Rules:** Modifications stay within the `APM_RULES {}` block. Use `##` headings for categories. Only add genuinely universal patterns.
 
-**Dependency Graph:** When Task dependencies change, regenerate the relevant graph section. Same-agent dependencies use `-->`, cross-agent use `-.->`. Update node styles if agents change.
+**Dependency Graph:** When Task dependencies change, regenerate the relevant graph section. All dependencies use `-->` (solid arrows). Update node styles if Worker Groups change.
 
 ---
 

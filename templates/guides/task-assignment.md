@@ -19,7 +19,7 @@ This guide defines how you construct and deliver Task Prompts for subagents, man
 
 ### 2.1 Dependency Context Standards
 
-Tasks may depend on outputs from previous Tasks. The Manager classifies dependency context depth at dispatch time based on the dispatch plan for the current cycle.
+Tasks may depend on outputs from previous Tasks. You classify dependency context depth at dispatch time based on the dispatch plan for the current cycle.
 
 **Intra-batch dependencies:** The producer task is earlier in the same batch (same subagent). The subagent has working familiarity from executing the producer. Provide light context - recall anchors, key file paths, brief reference to previous work. Detail increases with dependency complexity.
 
@@ -45,7 +45,7 @@ Follow-up Task Prompts occur when the review outcome determines retry after inve
 
 **Content principle:** The follow-up is a completely new prompt dispatched to a fresh subagent with zero prior context. It is not a continuation - the new subagent has no knowledge of the previous attempt. The follow-up must be self-contained: refined Objective, Instructions, Output, and Validation based on what went wrong, plus an explicit follow-up context section explaining what was previously attempted, what issues were encountered, and what approach to take instead. Include the previous Task Log's diagnostics as factual context. Do not copy the previous prompt - give the subagent concrete, corrected direction.
 
-**Log path continuity:** Use the same `log_path` as the original. The subagent overwrites the previous log, keeping memory coherent with one log per Task regardless of how many dispatches occurred. The Manager captures iteration patterns in Stage summaries when relevant.
+**Log path continuity:** Use the same `log_path` as the original. The subagent overwrites the previous log, keeping memory coherent with one log per Task regardless of how many dispatches occurred. Capture iteration patterns in Stage summaries when relevant.
 
 **Dispatch mechanism:** Always a fresh `Agent()` call. Subagents are ephemeral - there is no mechanism to continue a completed subagent.
 
@@ -78,13 +78,13 @@ Version control provides workspace isolation during parallel dispatch. Each disp
 
 Worktrees contain only tracked files; if a subagent needs untracked assets, note this in the Task Prompt. When `.apm/` is tracked (or partially tracked), the worktree may contain `.apm/` files but all APM runtime operations (Task Logs) must target the project root's `.apm/`, not the worktree copy. Include this guidance in the Task Prompt's Workspace section for worktree dispatch.
 
-**Why not `isolation="worktree"`:** Claude Code's auto-worktree creates branches named `worktree-<slug>` at `.claude/worktrees/`, which does not follow APM's branch naming conventions. Manual worktree management gives the Manager full control over branch names and paths.
+**Why not `isolation="worktree"`:** Claude Code's auto-worktree creates branches named `worktree-<slug>` at `.claude/worktrees/`, which does not follow APM's branch naming conventions. Manual worktree management gives you full control over branch names and paths.
 
 ### 2.6 Dispatch Mechanics
 
 {TASK_DISPATCH_GUIDANCE}
 
-**Foreground by default.** All dispatch runs in the foreground - the Manager blocks until the subagent returns. Background dispatch is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
+**Foreground by default.** All dispatch runs in the foreground - you block until the subagent returns. Background dispatch is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
 
 ---
 
@@ -120,7 +120,7 @@ Assemble the Task Prompt and dispatch via `Agent()`.
 
 Perform the following actions:
 1. Construct YAML frontmatter per §4.1 Task Prompt Format.
-2. Construct prompt body: Task Reference, Context from Dependencies (if applicable), Objective, Detailed Instructions, Workspace, Expected Output, Validation Criteria, Instruction Accuracy, Task Iteration, Task Logging instructions, Reporting Instructions.
+2. Construct prompt body: Task Reference, Context from Dependencies (if applicable), Objective, Detailed Instructions, Workspace, Expected Output, Validation Criteria, Instruction Accuracy, Task Logging path.
 3. Create a feature branch off the repository's base branch per §2.5 Version Control Standards. For parallel dispatch, create a worktree: `git worktree add .apm/worktrees/<branch-slug> -b <branch-name>`. Include the branch name (sequential) or worktree path (parallel) in the Workspace section.
 4. Record the branch name in the Task row's Branch column when updating the Tracker.
 5. Dispatch per §2.6 Dispatch Mechanics. For batches, use §4.5 Batch Envelope Format to combine multiple Task Prompts in the prompt content.

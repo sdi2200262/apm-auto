@@ -98,8 +98,8 @@ The communication system consists of a single Handoff Bus file at `.apm/bus/mana
 | Term | Definition |
 | ------ | ------------ |
 | **Handoff Bus** | Manager's bus file (`handoff.md`). Contains the handoff prompt content that instructs the incoming Manager to rebuild working context. |
-| **Task Prompt** | Self-contained prompt string passed to `Agent()` providing a subagent with everything needed to execute and validate a Task. Prepended with a standard preamble. |
-| **Task Report** | Structured result summary returned by the subagent as its final output. Contains status, log path, flags, and a brief summary. |
+| **Task Prompt** | Self-contained prompt string passed to `Agent()` providing a subagent with everything needed to execute and validate a Task. |
+| **Task Result** | Structured result summary returned by the subagent as its final output. Contains status, log path, flags, and a brief summary. |
 
 ---
 
