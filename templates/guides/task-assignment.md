@@ -82,13 +82,9 @@ Worktrees contain only tracked files; if a subagent needs untracked assets, note
 
 ### 2.6 Dispatch Mechanics
 
-Task dispatch uses the `apm-worker` custom subagent defined in `{AGENT_PATH:apm-worker}`. The agent definition contains the subagent's behavioral rules (execution procedure, iteration limits, logging formats, version control standards) as its system prompt. The Task Prompt content is passed as the `prompt` parameter - it contains only the task-specific content (frontmatter, dependency context, objective, instructions, validation criteria).
-
-Dispatch format: `Agent(subagent_type="apm-worker", description="<short task label>", prompt=<task_prompt_content>)`. The `description` parameter is required on every call (e.g., `description="Execute Task 1.2: Implement user auth"`).
+{TASK_DISPATCH_GUIDANCE}
 
 **Foreground by default.** All dispatch runs in the foreground - the Manager blocks until the subagent returns. Background dispatch is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
-
-For parallel dispatch, multiple `Agent()` calls in a single message run concurrently. The Manager blocks until all return.
 
 ---
 
@@ -127,10 +123,7 @@ Perform the following actions:
 2. Construct prompt body: Task Reference, Context from Dependencies (if applicable), Objective, Detailed Instructions, Workspace, Expected Output, Validation Criteria, Instruction Accuracy, Task Iteration, Task Logging instructions, Reporting Instructions.
 3. Create a feature branch off the repository's base branch per §2.5 Version Control Standards. For parallel dispatch, create a worktree: `git worktree add .apm/worktrees/<branch-slug> -b <branch-name>`. Include the branch name (sequential) or worktree path (parallel) in the Workspace section.
 4. Record the branch name in the Task row's Branch column when updating the Tracker.
-5. Dispatch per §2.6 Dispatch Mechanics:
-   - *Sequential (single or batch):* `Agent(subagent_type="apm-worker", description="...", prompt=task_prompt_content)`.
-   - *Parallel:* Multiple `Agent(subagent_type="apm-worker", description="...", prompt=task_prompt_content)` calls in a single message.
-   For batches, use §4.5 Batch Envelope Format to combine multiple Task Prompts in the prompt content.
+5. Dispatch per §2.6 Dispatch Mechanics. For batches, use §4.5 Batch Envelope Format to combine multiple Task Prompts in the prompt content.
 
 ### 3.4 Follow-Up Task Prompt Construction
 
@@ -141,7 +134,7 @@ Perform the following actions:
 2. If planning documents were modified, extract relevant updated content per §3.2 Per-Task Analysis.
 3. Refine all content sections per §2.3 Follow-Up Standards. Include a follow-up context section explaining the issue and required refinement.
 4. Construct the follow-up prompt per §4.2 Follow-Up Format. Same `log_path` as the original.
-5. Dispatch per §2.6 Dispatch Mechanics: `Agent(subagent_type="apm-worker", description="...", prompt=follow_up_prompt_content)`.
+5. Dispatch per §2.6 Dispatch Mechanics.
 
 ---
 

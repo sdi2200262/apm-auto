@@ -25,6 +25,12 @@
         "explorerName": "Explore",
         "configNote": null
       },
+      "taskDispatchGuidance": {
+        "agentType": "apm-worker",
+        "syntax": "Agent(subagent_type=\"apm-worker\", description=\"<short task label>\", prompt=<task_prompt_content>)",
+        "batchNote": "For batches, the prompt contains a batch envelope with multiple Task Prompts.",
+        "parallelNote": "For parallel dispatch, multiple calls in a single message run concurrently."
+      },
       "postInstallNote": null
     }
   ]

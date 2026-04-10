@@ -25,6 +25,7 @@ import path from 'path';
  * - {PLANNER_SUBAGENT_GUIDANCE}: Platform-specific subagent exploration guidance for Planner
  * - {MANAGER_SUBAGENT_GUIDANCE}: Platform-specific subagent guidance for Manager investigation
  * - {SUBAGENT_GUIDANCE}: Platform-specific subagent guidance for non-role agents (standalone commands)
+ * - {TASK_DISPATCH_GUIDANCE}: Platform-specific Task dispatch guidance (apm-worker agent invocation, batch/parallel notes)
  * - {ARCHIVE_EXPLORER_GUIDANCE}: Platform-specific guidance for spawning the apm-archive-explorer custom agent
  * - {CONTEXT_ATTACH_SYNTAX}: Platform-specific instructions for how Users reference files in chat
  * - {NEW_CHAT_GUIDANCE}: Platform-specific natural language clause for starting a new chat
@@ -114,6 +115,14 @@ export function replacePlaceholders(content, context) {
   // Replace SUBAGENT_GUIDANCE placeholder (generic, for non-role agents)
   const subagentGuidanceText = `Spawn a dedicated ${subagentGuidance.explorerName} subagent - it runs in its own context window and returns findings when complete: \`${subagentGuidance.toolSyntax}\`.`;
   replaced = replaced.replace(/{SUBAGENT_GUIDANCE}/g, subagentGuidanceText);
+
+  // Replace TASK_DISPATCH_GUIDANCE placeholder
+  const taskDispatch = target.taskDispatchGuidance;
+  if (taskDispatch) {
+    const workerAgentPath = path.join(directories.agents, `${taskDispatch.agentType}${agentExt}`);
+    const taskDispatchText = `Dispatch via \`${taskDispatch.syntax}\`. The \`${taskDispatch.agentType}\` agent definition at \`${workerAgentPath}\` provides the subagent's behavioral rules as its system prompt; the \`prompt\` parameter contains the task-specific content. The \`description\` parameter is required on every call. ${taskDispatch.batchNote} ${taskDispatch.parallelNote}`;
+    replaced = replaced.replace(/{TASK_DISPATCH_GUIDANCE}/g, taskDispatchText);
+  }
 
   // Replace ARCHIVE_EXPLORER_GUIDANCE placeholder
   const archiveExplorerPath = path.join(directories.agents, `apm-archive-explorer${agentExt}`);

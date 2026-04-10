@@ -182,7 +182,8 @@ Supported placeholders:
 - `{SKILLS_DIR}`, `{GUIDES_DIR}`, `{AGENTS_DIR}` - Platform-specific directory paths
 - `{ARGS}` - `$ARGUMENTS`
 - `{RULES_FILE}` - `CLAUDE.md`
-- `{PLANNER_SUBAGENT_GUIDANCE}`, `{MANAGER_SUBAGENT_GUIDANCE}`, `{SUBAGENT_GUIDANCE}` - Role-specific subagent syntax
+- `{PLANNER_SUBAGENT_GUIDANCE}`, `{MANAGER_SUBAGENT_GUIDANCE}`, `{SUBAGENT_GUIDANCE}` - Role-specific utility subagent syntax
+- `{TASK_DISPATCH_GUIDANCE}` - Task dispatch subagent syntax (apm-worker invocation, batch/parallel notes)
 - `{ARCHIVE_EXPLORER_GUIDANCE}` - Subagent spawn syntax for archive explorer agent
 - `{CONTEXT_ATTACH_SYNTAX}` - Platform-specific file reference instructions
 

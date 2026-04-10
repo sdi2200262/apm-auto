@@ -22,11 +22,11 @@ Extract the information needed for the next review decision.
 
 **Status interpretation:** Assess whether the status and flags are consistent with the log's body content - inconsistency is a hallucination indicator. Status values are Success (objective achieved, all validation passed), Partial (progress made, needs guidance), Failed (objective not achieved).
 
-**Flag interpretation.** Workers set flags based on scoped observations. Interpret with full project awareness:
-- `important_findings: true` - Worker observed something potentially beyond Task scope. Assess whether it affects planning documents or other Tasks. When findings indicate that validation criteria from the Task Prompt were not fully exercised, this warrants investigation before marking Done. Important findings may also include User corrections noted as potential Rules entries - assess whether they warrant a Rules addition per §2.3 Planning Document Modification Standards.
-- `compatibility_issues: true` - Worker observed conflicts with existing systems. Assess whether it indicates Plan, Spec, or Rules issues.
+**Flag interpretation.** Subagents set flags based on scoped observations. Interpret with full project awareness:
+- `important_findings: true` - Subagent observed something potentially beyond Task scope. Assess whether it affects planning documents or other Tasks. When findings indicate that validation criteria from the Task Prompt were not fully exercised, this warrants investigation before marking Done. Important findings may also include User corrections noted as potential Rules entries - assess whether they warrant a Rules addition per §2.3 Planning Document Modification Standards.
+- `compatibility_issues: true` - Subagent observed conflicts with existing systems. Assess whether it indicates Plan, Spec, or Rules issues.
 
-**Content review:** Beyond flags and status, review the log body sections (Summary, Details, Output, Validation, Issues) to understand what happened and inform the review outcome. When findings contradict content in the Spec, Plan, or Rules - factual inaccuracies, incorrect assumptions, outdated descriptions - treat the affected document as needing correction per §3.4 Planning Document Modification regardless of whether the Worker handled the discrepancy.
+**Content review:** Beyond flags and status, review the log body sections (Summary, Details, Output, Validation, Issues) to understand what happened and inform the review outcome. When findings contradict content in the Spec, Plan, or Rules - factual inaccuracies, incorrect assumptions, outdated descriptions - treat the affected document as needing correction per §3.4 Planning Document Modification regardless of whether the subagent handled the discrepancy.
 
 ### 2.2 Review Outcome Standards
 
@@ -38,7 +38,7 @@ After reviewing a Task Log, determine the review outcome.
 
 **Post-investigation outcome:**
 - If no issues are found (false positives, nothing actionable), continue to the next Task(s).
-- If the Worker needs to retry with refined instructions, create a follow-up Task Prompt per `{GUIDE_PATH:task-assignment}` §3.4 Follow-Up Task Prompt Construction. If the Worker also left changes uncommitted, note this in the follow-up instructions.
+- If the subagent needs to retry with refined instructions, create a follow-up Task Prompt per `{GUIDE_PATH:task-assignment}` §3.4 Follow-Up Task Prompt Construction. If the subagent also left changes uncommitted, note this in the follow-up instructions.
 - If planning documents need modification, proceed to §3.4 Planning Document Modification.
 - If investigation reveals deficiencies in previously-Done work, create a new Task through Plan modification per §2.3 Planning Document Modification Standards. The original Task remains Done; reference it from the new Task, include the discovery context, and specify what needs correction.
 
@@ -52,15 +52,15 @@ Small contained actions (follow-ups for isolated issues, minor planning document
 
 ### 2.4 Parallel Coordination Standards
 
-When multiple Workers are active simultaneously, coordinate asynchronously.
+When multiple subagents are dispatched in parallel, coordinate after all return.
 
-**Immediate reassessment:** After processing each report, reassess readiness and continue to dispatch assessment in the same turn - review and next dispatch happen in a single response without waiting for User input. The only reasons to pause are when no Tasks are Ready (wait state) or when a modification requires User collaboration per §2.2 Review Outcome Standards.
+**Immediate reassessment:** After processing results, reassess readiness and continue to dispatch assessment in the same turn - review and next dispatch happen in a single response without waiting for User input. The only reasons to pause are when no Tasks are Ready (wait state) or when a modification requires User collaboration per §2.2 Review Outcome Standards.
 
-**Async report handling:** Reports arrive in any order. Process each as it comes - complete the review, merge if needed, reassess readiness, dispatch newly Ready Tasks. Each report-to-dispatch cycle is continuous.
+**Parallel result handling:** During parallel dispatch, all `Agent()` calls return together (the Manager blocks until all complete). Process each result - complete the review, merge if needed, reassess readiness, dispatch newly Ready Tasks. Each review-to-dispatch cycle is continuous.
 
 **Merge coordination:** After successful review during parallel dispatch, merge the completed Task's branch per §2.5 Merge Standards before dispatching dependent Tasks. At Stage end, perform a merge sweep per §2.5 Merge Standards.
 
-**Wait state:** When no Tasks are Ready but Workers are active, communicate what was processed, what is pending, and which report(s) the User should return next. If a pending report would unlock a better dispatch combination per `{GUIDE_PATH:task-assignment}` §2.4 Dispatch Standards, recommend the User prioritize that report.
+**Wait state:** When no Tasks are Ready but active subagents have not yet returned, communicate what was processed, what is pending, and what the User should expect next.
 
 ### 2.5 Merge Standards
 
@@ -94,15 +94,11 @@ Use a bulleted list for both types - one item per note, each self-contained and 
 
 After all Tasks in a Stage are Done, assess whether the Stage's deliverables require holistic verification before writing the Stage summary and proceeding. This is a judgment call, not a mandatory step.
 
-**When to verify:** Stages where the User confirmed verification during the understanding summary approval, where Task Reviews surfaced edge cases or compatibility concerns, where follow-up prompts were required during the Stage, where Workers reported difficulties or important findings, where the Planner flagged complexity in Plan notes, or where accumulated working notes suggest deliverables should be checked as a whole. Simple Stages with clean Task Reviews and no flags can proceed directly to the summary.
+**When to verify:** Stages where the User confirmed verification during the understanding summary approval, where Task Reviews surfaced edge cases or compatibility concerns, where follow-up prompts were required during the Stage, where subagents reported difficulties or important findings, where the Planner flagged complexity in Plan notes, or where accumulated working notes suggest deliverables should be checked as a whole. Simple Stages with clean Task Reviews and no flags can proceed directly to the summary.
 
-**How to verify:** Re-run the most important validation checks Workers already performed, exercise edge cases that individual Task validation may not have covered, run holistic end-to-end checks across the Stage's deliverables, and read source files, artifacts, or data to confirm the codebase is in the expected state. Verification should match the validation patterns established in the project - the same kinds of checks at the integration level. For context-intensive checks, dispatch a verification subagent and verify its findings against the referenced files before acting on them.
+**How to verify:** Re-run the most important validation checks subagents already performed, exercise edge cases that individual Task validation may not have covered, run holistic end-to-end checks across the Stage's deliverables, and read source files, artifacts, or data to confirm the codebase is in the expected state. Verification should match the validation patterns established in the project - the same kinds of checks at the integration level. For context-intensive checks, dispatch a verification subagent and verify its findings against the referenced files before acting on them.
 
-**When verification reveals issues:** Determine the appropriate response based on scope. For contained issues you can resolve directly, fix them. For issues requiring focused investigation, dispatch a subagent. For issues requiring Worker-level execution, create a new Task through Plan modification per §2.3 Planning Document Modification Standards. For issues whose scope or direction is unclear, present findings to the User with your assessment and proposed options. When verification requires User judgment or action, present findings and pause.
-
-### 2.9 Non-APM Agent Reports
-
-When a report arrives from an agent not listed in Worker tracking, it is a non-APM agent that joined the session independently. These reports do not follow the standard processing flow - there is no Task Log, no Worker tracking entry, and no dispatch state to update. Assess the report on its own terms: what the agent did, whether it affects planning documents or current dispatch. Add a working note to the Tracker recording the agent's identity and contribution. Inform the User of the findings. If follow-up work is needed, assign it per `{GUIDE_PATH:task-assignment}` §2.7 Non-APM Agent Dispatch.
+**When verification reveals issues:** Determine the appropriate response based on scope. For contained issues you can resolve directly, fix them. For issues requiring focused investigation, dispatch a subagent. For issues requiring subagent-level execution, create a new Task through Plan modification per §2.3 Planning Document Modification Standards. For issues whose scope or direction is unclear, present findings to the User with your assessment and proposed options. When verification requires User judgment or action, present findings and pause.
 
 ---
 
@@ -110,24 +106,22 @@ When a report arrives from an agent not listed in Worker tracking, it is a non-A
 
 Three sequential steps per report (processing, log review, outcome determination), with conditional branches for planning document modification and Stage summary creation. Update the Tracker after each cycle.
 
-### 3.1 Report Processing
+### 3.1 Result Processing
 
-Execute when User runs `/apm-5-check-reports` or returns with a Task Report (or batch report) from a Worker.
+Execute after a subagent returns from an `Agent()` call.
 
 Perform the following actions:
-1. Read the report from the Report Bus (`.apm/bus/<agent-slug>/report.md`).
-2. If batch report (`batch: true` in frontmatter): the report contains per-Task outcomes in a `tasks` array (each with `stage`, `task`, `status`) and fields `completed`, `stopped_early`. Process each completed Task individually through §3.2 Task Log Review and §3.3 Review Outcome. Tasks with status `"Not started"` re-enter the dispatch pool.
-3. Check for Handoff indication - look for a statement that the Worker is a new instance and a list of current-Stage Task Logs read. When previous Stages exist, the report also notes that previous-Stage logs were not loaded. If detected, verify the Handoff Log exists. Update Worker tracking in the Tracker: increment the instance number for this Worker. Compare the loaded Task Logs against all Tasks previously completed by this Worker and record cross-agent overrides in the Tracker for any completed Tasks whose logs were not loaded. From this point forward, previous-Stage same-agent dependencies for this Worker are treated as cross-agent.
-4. Check for auto-compaction indication - a Worker that recovered from auto-compaction notes it in the Task Report. If detected, update Worker tracking Notes in the Tracker (e.g., "auto-compacted, recovered"). No dependency reclassification - the Worker continues as the same instance. Provide slightly more comprehensive dependency context in future Task Prompts for this Worker.
-5. Update dispatch tracking: mark this Worker as available, note completed Task(s) for readiness assessment.
-6. Merge completed branch per §2.5 Merge Standards if dependent Tasks need it.
+1. Read the subagent's return value (Task Result or Batch Result).
+2. If batch result: process each completed Task individually through §3.2 Task Log Review and §3.3 Review Outcome. Tasks marked "Not started" re-enter the dispatch pool.
+3. Note completed Task(s) for readiness assessment.
+4. Merge completed branch per §2.5 Merge Standards if dependent Tasks need it.
 
 ### 3.2 Task Log Review
 
-Execute after report processing. Present your assessment of the Task Log visibly in natural language: whether the claimed status is consistent with evidence, whether flags indicate coordination-relevant findings, and what the appropriate next action is.
+Execute after result processing. Present your assessment of the Task Log visibly in natural language: whether the claimed status is consistent with evidence, whether flags indicate coordination-relevant findings, and what the appropriate next action is.
 
 Perform the following actions:
-1. Read the Task Log at the path referenced in the Task Report.
+1. Read the Task Log at the path referenced in the Task Result.
 2. Interpret content per §2.1 Task Log Review Standards: status, flags, body sections. Assess consistency between status/flags and body content.
 3. Continue to the review outcome.
 
@@ -136,16 +130,16 @@ Perform the following actions:
 Execute after Task Log review.
 
 Perform the following actions:
-1. Review findings from the Task Log per §2.2 Review Outcome Standards. Assess deliverables against the Task's objectives and validation criteria before determining the outcome. If version control is active and the Task was successful but changes remain uncommitted on the Task branch, commit on behalf following the conventions from Rules - no follow-up needed. If everything looks good, skip to step 3. If something needs attention, continue to step 2.
+1. Review findings from the Task Log per §2.2 Review Outcome Standards. Assess deliverables against the Task's objectives and validation criteria before determining the outcome. Check for drift: does the Task Log's content match the dispatched objective? Do committed files correspond to the expected output? Are there changes outside the Task's scope? If version control is active and the Task was successful but changes remain uncommitted on the Task branch, commit on behalf following the conventions from Rules - no follow-up needed. If everything looks good, skip to step 3. If something needs attention (including drift), continue to step 2.
 2. Investigate and determine outcome per §2.2 Review Outcome Standards:
    - If no issues are found, continue to step 3.
-   - If the Worker needs a follow-up, create a follow-up Task Prompt per `{GUIDE_PATH:task-assignment}` §3.4 Follow-Up Task Prompt Construction and continue to step 3.
+   - If a follow-up is needed (including drift correction), create a follow-up Task Prompt per `{GUIDE_PATH:task-assignment}` §3.4 Follow-Up Task Prompt Construction and continue to step 3.
    - If planning documents need modification, proceed to §3.4 Planning Document Modification (returns to step 3 after completion).
 3. Update the Tracker per §4.1 Task Tracking Format: mark completed Tasks as Done, reassess Waiting Tasks for readiness, update branches. Execute pending merges per §2.5 Merge Standards before reassessing readiness. Assess whether the review yielded note-worthy context and add to working notes - both ephemeral coordination items and durable observations for later distillation. Remove stale working notes. Batch all changes from this review-dispatch cycle into a single Tracker edit.
 4. Assess next action per §2.4 Parallel Coordination Standards:
    - If all Stage Tasks are Done and merged, collapse Stage per §4.1 Task Tracking Format and proceed to §3.5 Stage Summary Creation.
    - If Tasks are Ready, proceed to `{GUIDE_PATH:task-assignment}` §3.1 Dispatch Assessment in the same turn.
-   - If no Tasks are Ready but Workers are active, communicate wait state per §2.4 Parallel Coordination Standards and direct User to return the next report.
+   - If no Tasks are Ready but active subagents have not yet returned, communicate wait state per §2.4 Parallel Coordination Standards.
 
 ### 3.4 Planning Document Modification
 
@@ -186,13 +180,13 @@ The Task Tracking section within the Tracker tracks Task statuses, agent assignm
 
 **Stage 2:**
 
-| Task | Status | Agent | Branch |
-|------|--------|-------|--------|
-| 2.1 | Done | frontend-agent | |
-| 2.2 | Active | backend-agent | feat/backend-models |
-| 2.3 | Active | frontend-agent | feat/frontend-auth |
-| 2.4 | Waiting: 2.1 | backend-agent | |
-| 2.5 | Ready | frontend-agent | |
+| Task | Status | Domain | Branch |
+|------|--------|--------|--------|
+| 2.1 | Done | frontend | |
+| 2.2 | Active | backend | feat/backend-models |
+| 2.3 | Active | frontend | feat/frontend-auth |
+| 2.4 | Waiting: 2.1 | backend | |
+| 2.5 | Ready | frontend | |
 ```
 
 **Task statuses:** `Ready`, `Active`, `Done`, `Waiting: <deps>`.
@@ -200,11 +194,11 @@ The Task Tracking section within the Tracker tracks Task statuses, agent assignm
 **Task lifecycle:**
 - `Waiting: N.M` - dependencies not met. May list multiple dependencies.
 - `Ready` - all dependencies complete, can be dispatched.
-- `Active | branch-name` - dispatched, Worker is on a branch.
+- `Active | branch-name` - dispatched, subagent is on a branch.
 - `Done | branch-name` - reviewed, branch pending merge.
 - `Done` (no branch) - merged.
 
-Write the end state of each Task for the review-dispatch cycle. When a Task is unblocked and dispatched in the same turn, write directly from Waiting to Active. When a Task is unblocked but cannot be dispatched - the assigned Worker has an Active Task or a pending report would unlock a better dispatch per `{GUIDE_PATH:task-assignment}` §2.4 Dispatch Standards - write Ready.
+Write the end state of each Task for the review-dispatch cycle. When a Task is unblocked and dispatched in the same turn, write directly from Waiting to Active. When a Task is unblocked but cannot be dispatched immediately, write Ready.
 
 **Branch cleanup:** After merging a completed branch per §2.5 Merge Standards, clear the Branch column for that Task row.
 
@@ -226,23 +220,8 @@ completed_at: <datetime>  # set by Manager at project completion - absence means
 
 **Tracker sections:**
 - *`## Task Tracking`:* Per-Stage Task state per §4.1 Task Tracking Format.
-- *`## Worker Tracking`:* Records Worker states, instance numbers, and coordination notes. Update Worker tracking when Workers are first dispatched to, when Handoffs are detected, and when auto-compaction recovery is reported. Cross-agent overrides are recorded below the Worker table when Worker Handoffs reclassify dependencies, listing the specific Tasks affected and referencing the Handoff that triggered the reclassification.
 - *`## Version Control`:* Per-repository base branch, branch convention, and commit convention per `{GUIDE_PATH:task-assignment}` §4.4 Tracker VC Entry Format. Branch state is tracked per-Task in the Task table's Branch column.
 - *`## Working Notes`:* Ephemeral coordination context per §2.7 Note-Taking Standards. Contents are inserted and removed as context evolves.
-
-**Worker Tracking Table:**
-```markdown
-| Agent | Instance | Notes |
-|-------|----------|-------|
-| frontend-agent | 2 | Handoff after Stage 1 |
-| backend-agent | 1 | |
-```
-
-**Cross-Agent Overrides** (below Worker Tracking table, when applicable):
-```markdown
-**Cross-Agent Overrides:**
-- frontend-agent: Tasks 1.1, 1.3 (pre-Handoff) - treat as cross-agent
-```
 
 ### 4.3 Index Format
 
@@ -292,10 +271,9 @@ modified: Task 2.3 scope clarified based on task-02-02.log.md findings. Modified
 
 ## 5. Common Mistakes
 
-- *Status inconsistency:* When a Worker claims Success but the log body shows incomplete validation, unresolved issues, or missing deliverables, treat the content as authoritative over the status field and investigate before accepting.
-- *Accepting insufficient reports:* Marking Tasks as Done when validation criteria were not fully exercised or deliverables are partial. Push back with a follow-up Task Prompt before accepting.
-- *Skipping Handoff detection:* Failing to track Worker Handoff leads to incorrect dependency context treatment.
-- *Unacknowledged recovery:* When a Worker report indicates auto-compaction occurred, factor this into the assessment - reconstructed context may have affected report completeness.
+- *Status inconsistency:* When a subagent claims Success but the log body shows incomplete validation, unresolved issues, or missing deliverables, treat the content as authoritative over the status field and investigate before accepting.
+- *Accepting insufficient results:* Marking Tasks as Done when validation criteria were not fully exercised or deliverables are partial. Push back with a follow-up Task Prompt before accepting.
+- *Missing drift detection:* Not checking whether the subagent's work matches the dispatched objective. Review committed files against expected output and check for changes outside the Task's scope.
 - *Single-document tunnel vision:* Updating the Spec without checking whether the Plan references the same content, or modifying the Plan without assessing whether the Spec's design assumptions still hold. Changes to one planning document often cascade to the other.
 - *Symptom treatment:* Modifying one document to work around an issue that should be addressed in another. When an issue surfaces in execution, trace it to the document where the root cause lives rather than patching around it elsewhere.
 
