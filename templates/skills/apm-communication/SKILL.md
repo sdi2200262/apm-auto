@@ -3,7 +3,7 @@ name: apm-communication
 description: Agent communication standards for structured inter-agent messaging.
 ---
 
-# APM {VERSION} - Communication Skill
+# APM Auto {VERSION} - Communication Skill
 
 ## 1. Overview
 

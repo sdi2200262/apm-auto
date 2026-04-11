@@ -1,4 +1,4 @@
-# APM {VERSION} - Context Gathering Guide
+# APM Auto {VERSION} - Context Gathering Guide
 
 ## 1. Overview
 

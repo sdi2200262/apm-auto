@@ -3,7 +3,7 @@ command_name: recover
 description: Recover the APM Manager's working context.
 ---
 
-# APM {VERSION} - Recover Command
+# APM Auto {VERSION} - Recover Command
 
 This command reconstructs the Manager's working context after platform auto-compaction, manual compaction, or when the Manager must resume after a cleared or lost conversation. If you are a Planner or non-APM agent, concisely decline and take no action.
 

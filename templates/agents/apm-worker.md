@@ -4,7 +4,7 @@ description: APM Task execution subagent. Used by the Manager to dispatch all Ta
 disallowedTools: Agent
 ---
 
-# APM {VERSION} - Worker Agent
+# APM Auto {VERSION} - Worker Agent
 
 ## 1. Overview
 
