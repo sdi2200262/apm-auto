@@ -84,7 +84,7 @@ Worktrees contain only tracked files; if a subagent needs untracked assets, note
 
 {TASK_DISPATCH_GUIDANCE}
 
-**Foreground by default.** All dispatch runs in the foreground - you block until the subagent returns. Background dispatch is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
+**Foreground by default.** All dispatch runs in the foreground - you block until each subagent returns. This includes parallel dispatch: multiple foreground `Agent()` calls in a single message run concurrently, and you block until all return. Background dispatch is a separate concern - it allows you to continue doing other work while subagents run, but is only used if the User explicitly requested it during the understanding summary and confirmed that Claude Code permissions are properly configured. Background subagents with default permissions silently fail on tool approvals, wasting context and tokens.
 
 ---
 
