@@ -9,6 +9,15 @@ Contributions are welcome. This is a custom APM adaptation for Claude Code - for
 - **Build system** - Placeholder additions, build pipeline enhancements
 - **Documentation** - Improve the README, CONTRIBUTING, and other docs
 
+## Repository Layout
+
+- `templates/` - Source files that become the APM Auto installation (commands, guides, skills, agent definitions, artifact templates)
+- `templates/_standards/` - Development-time specifications. Not included in builds.
+- `build/` - Build system that processes templates into the Claude Code bundle
+- `skills/apm-customization/` - Standalone skill for AI agents helping with further customization of this repository. Adapted for APM Auto's autonomous-dispatch model.
+
+APM Auto installs via the official `agentic-pm` CLI; this repository does not ship its own CLI source.
+
 ## Making Changes
 
 APM uses a top-down propagation model. All workflow changes follow this order:
